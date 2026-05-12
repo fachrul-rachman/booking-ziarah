@@ -455,21 +455,18 @@ new class extends Component
 };
 ?>
 
-<div class="max-w-lg mx-auto pb-10">
+<div class="mx-auto max-w-lg pb-10">
 
-    {{-- ══════════════════════════════════════════
-         STEPPER
-    ══════════════════════════════════════════ --}}
-    <div class="flex items-center mt-5 px-1">
-        @php $stepLabels = ['Lokasi', 'Zona & Lot', 'Fasilitas', 'Data Diri']; @endphp
+    {{-- ══ STEPPER ══ --}}
+    @php $stepLabels = ['Lokasi', 'Zona & Lot', 'Fasilitas', 'Data Diri']; @endphp
+    <div class="mt-6 flex items-center px-1">
         @foreach ($stepLabels as $i => $label)
             @php $n = $i + 1; @endphp
-            <div class="flex flex-col items-center flex-shrink-0" style="min-width:54px">
+            <div class="flex flex-col items-center flex-shrink-0" style="min-width:56px">
                 <div @class([
-                    'w-8 h-8 rounded-full flex items-center justify-center text-xs font-bold border-2 transition-all',
-                    'bg-emerald-800 border-emerald-800 text-white'         => $n === $currentStep,
-                    'bg-emerald-50  border-emerald-600 text-emerald-700'   => $n < $currentStep,
-                    'bg-white       border-gray-300    text-gray-400'      => $n > $currentStep,
+                    'w-8 h-8 rounded-full flex items-center justify-center text-xs font-medium border transition-all',
+                    'bg-gray-800 border-gray-800 text-white' => $n <= $currentStep,
+                    'bg-white border-gray-200 text-gray-400' => $n > $currentStep,
                 ])>
                     @if ($n < $currentStep)
                         <svg width="12" height="12" viewBox="0 0 12 12" fill="none"><path d="M2 6l3 3 5-5" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>
@@ -478,59 +475,61 @@ new class extends Component
                     @endif
                 </div>
                 <span @class([
-                    'mt-1 text-center text-[10px] leading-tight font-semibold',
-                    'text-emerald-800' => $n === $currentStep,
-                    'text-emerald-600' => $n < $currentStep,
-                    'text-gray-400'    => $n > $currentStep,
+                    'mt-1 text-center text-[10px] leading-tight font-medium',
+                    'text-gray-900' => $n === $currentStep,
+                    'text-gray-500' => $n < $currentStep,
+                    'text-gray-400' => $n > $currentStep,
                 ]) style="max-width:52px">{{ $label }}</span>
             </div>
             @if ($n < count($stepLabels))
-                <div class="flex-1 h-0.5 mb-4 mx-0.5 rounded-full {{ $n < $currentStep ? 'bg-emerald-600' : 'bg-gray-200' }}"></div>
+                <div @class([
+                    'flex-1 mb-4 mx-0.5 transition-all',
+                    'bg-gray-800' => $n < $currentStep,
+                    'bg-gray-200' => $n >= $currentStep,
+                ]) style="height:1px"></div>
             @endif
         @endforeach
     </div>
 
-    {{-- ══════════════════════════════════════════
-         MAIN CARD
-    ══════════════════════════════════════════ --}}
-    <div class="mt-4 bg-white rounded-2xl border border-gray-200 shadow-sm overflow-hidden">
+    {{-- ══ MAIN CARD ══ --}}
+    <div class="mt-4 rounded-xl bg-white border border-gray-100 overflow-hidden">
 
         {{-- Global error --}}
         @error('form')
-            <div class="mx-4 mt-4 flex gap-2 items-start bg-red-50 border border-red-200 rounded-xl p-3 text-sm text-red-700">
+            <div class="mx-4 mt-4 flex gap-2 items-start bg-red-50 border border-red-100 rounded-lg p-3 text-sm text-red-700">
                 <svg class="flex-shrink-0 mt-0.5" width="14" height="14" viewBox="0 0 14 14" fill="none"><circle cx="7" cy="7" r="6" stroke="currentColor" stroke-width="1.4"/><path d="M7 4v3.5M7 9.5v.3" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"/></svg>
                 {{ $message }}
             </div>
         @enderror
 
 
-        {{-- ──────────────────────────────────────
-             STEP 1 — Lokasi
-        ────────────────────────────────────── --}}
+        {{-- ── STEP 1 — Lokasi ── --}}
         @if ($currentStep === 1)
-            <div class="px-5 pt-5 pb-1">
-                <h2 class="text-base font-bold text-gray-900">Pilih Lokasi</h2>
-                <p class="text-sm text-gray-500 mt-0.5">Pilih area pemakaman yang ingin dikunjungi</p>
+            <div class="px-5 pt-5 pb-0">
+                <h2 class="text-base font-medium text-gray-900">Pilih Lokasi</h2>
+                <p class="text-sm text-gray-400 mt-0.5">Pilih area pemakaman yang ingin dikunjungi</p>
             </div>
             <div class="px-5 py-4">
-                <div class="grid grid-cols-1 gap-3 sm:grid-cols-2">
+                <div class="grid grid-cols-1 gap-2 sm:grid-cols-2">
                     @foreach ($locations as $loc)
                         @php $sel = (int)($location_id ?? 0) === (int)$loc['id']; @endphp
                         <button
                             type="button"
                             wire:click="selectLocation({{ $loc['id'] }})"
-                            class="flex items-center gap-3 rounded-xl border-2 p-4 text-left transition-all {{ $sel ? 'border-emerald-700 bg-emerald-50' : 'border-gray-200 bg-gray-50 hover:border-emerald-300 hover:bg-emerald-50/60' }}"
+                            class="flex items-center gap-3 rounded-lg border p-3.5 text-left transition-all
+                                {{ $sel ? 'border-gray-800 bg-white' : 'border-gray-200 bg-gray-50 hover:border-gray-400' }}"
                         >
-                            <div class="w-9 h-9 rounded-lg flex items-center justify-center flex-shrink-0 {{ $sel ? 'bg-emerald-700' : 'bg-white border border-gray-200' }}">
-                                <svg width="16" height="16" viewBox="0 0 16 16" fill="none" class="{{ $sel ? 'text-white' : 'text-emerald-700' }}">
+                            <div class="w-8 h-8 rounded-md flex items-center justify-center flex-shrink-0
+                                {{ $sel ? 'bg-gray-800' : 'bg-white border border-gray-200' }}">
+                                <svg width="14" height="14" viewBox="0 0 16 16" fill="none" class="{{ $sel ? 'text-white' : 'text-gray-500' }}">
                                     <path d="M8 1.5C5.515 1.5 3.5 3.515 3.5 6c0 3.375 4.5 9.5 4.5 9.5S12.5 9.375 12.5 6c0-2.485-2.015-4.5-4.5-4.5z" stroke="currentColor" stroke-width="1.4" stroke-linejoin="round"/>
                                     <circle cx="8" cy="6" r="1.5" stroke="currentColor" stroke-width="1.4"/>
                                 </svg>
                             </div>
-                            <span class="flex-1 text-sm font-semibold {{ $sel ? 'text-emerald-900' : 'text-gray-800' }}">{{ $loc['name'] }}</span>
+                            <span class="text-sm font-medium {{ $sel ? 'text-gray-900' : 'text-gray-700' }}">{{ $loc['name'] }}</span>
                             @if ($sel)
-                                <div class="w-5 h-5 rounded-full bg-emerald-700 flex items-center justify-center flex-shrink-0">
-                                    <svg width="9" height="9" viewBox="0 0 9 9" fill="none"><path d="M1.5 4.5l2.5 2.5 3.5-4" stroke="white" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+                                <div class="ml-auto w-4 h-4 rounded-full bg-gray-800 flex items-center justify-center flex-shrink-0">
+                                    <svg width="8" height="8" viewBox="0 0 9 9" fill="none"><path d="M1.5 4.5l2.5 2.5 3.5-4" stroke="white" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
                                 </div>
                             @endif
                         </button>
@@ -543,21 +542,19 @@ new class extends Component
         @endif
 
 
-        {{-- ──────────────────────────────────────
-             STEP 2 — Zona, Tanggal, Jam, Lot
-        ────────────────────────────────────── --}}
+        {{-- ── STEP 2 — Zona, Tanggal, Jam, Lot ── --}}
         @if ($currentStep === 2)
-            <div class="px-5 pt-5 pb-1">
-                <h2 class="text-base font-bold text-gray-900">Zona, Tanggal &amp; Lot</h2>
-                <p class="text-sm text-gray-500 mt-0.5">Tentukan zona, waktu, dan lot yang tersedia</p>
+            <div class="px-5 pt-5 pb-0">
+                <h2 class="text-base font-medium text-gray-900">Zona, Tanggal &amp; Lot</h2>
+                <p class="text-sm text-gray-400 mt-0.5">Tentukan zona, waktu, dan lot yang tersedia</p>
             </div>
-            <div class="px-5 py-4 space-y-5">
+            <div class="px-5 py-4 space-y-4">
 
                 {{-- Zona --}}
                 <div>
-                    <label class="block text-xs font-bold tracking-widest uppercase text-gray-500 mb-2">Zona</label>
+                    <label class="block text-[10px] font-medium uppercase tracking-widest text-gray-400 mb-1.5">Zona</label>
                     <select wire:model="zone_id"
-                        class="block w-full rounded-xl border-2 border-gray-200 bg-white px-3 py-2.5 text-sm text-gray-800 focus:border-emerald-600 focus:outline-none focus:ring-0 transition-colors">
+                        class="block w-full rounded-lg border border-gray-200 bg-gray-50 px-3 py-2.5 text-sm text-gray-800 focus:border-gray-500 focus:ring-0 focus:outline-none transition-colors">
                         <option value="">Pilih zona…</option>
                         @foreach ($zones as $z)
                             <option value="{{ $z['id'] }}">{{ $z['name'] }}</option>
@@ -568,41 +565,41 @@ new class extends Component
 
                 {{-- Tanggal --}}
                 <div>
-                    <label class="block text-xs font-bold tracking-widest uppercase text-gray-500 mb-2">Tanggal Kunjungan</label>
+                    <label class="block text-[10px] font-medium uppercase tracking-widest text-gray-400 mb-1.5">Tanggal kunjungan</label>
                     <div
-                        class="rounded-xl border-2 border-gray-200 overflow-hidden"
+                        class="rounded-lg border border-gray-200 overflow-hidden"
                         x-data="datePicker({
                             minDate: '{{ now()->addDays(2)->toDateString() }}',
                             selected: @entangle('booking_date').live,
                         })"
                     >
-                        <div class="flex items-center justify-between px-4 py-3 bg-gray-50 border-b border-gray-200">
+                        <div class="flex items-center justify-between px-3 py-2.5 bg-gray-50 border-b border-gray-200">
                             <button type="button"
-                                class="w-8 h-8 rounded-lg border border-gray-200 bg-white hover:bg-gray-100 flex items-center justify-center transition-colors"
+                                class="w-7 h-7 rounded-md border border-gray-200 bg-white hover:bg-gray-100 flex items-center justify-center transition-colors"
                                 @click="prevMonth()">
-                                <svg width="13" height="13" viewBox="0 0 13 13" fill="none"><path d="M8 10L4.5 6.5 8 3" stroke="#374151" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg>
+                                <svg width="12" height="12" viewBox="0 0 13 13" fill="none"><path d="M8 10L4.5 6.5 8 3" stroke="#374151" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg>
                             </button>
-                            <span class="text-sm font-bold text-gray-800" x-text="monthLabel"></span>
+                            <span class="text-sm font-medium text-gray-800" x-text="monthLabel"></span>
                             <button type="button"
-                                class="w-8 h-8 rounded-lg border border-gray-200 bg-white hover:bg-gray-100 flex items-center justify-center transition-colors"
+                                class="w-7 h-7 rounded-md border border-gray-200 bg-white hover:bg-gray-100 flex items-center justify-center transition-colors"
                                 @click="nextMonth()">
-                                <svg width="13" height="13" viewBox="0 0 13 13" fill="none"><path d="M5 3l3.5 3.5L5 10" stroke="#374151" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg>
+                                <svg width="12" height="12" viewBox="0 0 13 13" fill="none"><path d="M5 3l3.5 3.5L5 10" stroke="#374151" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg>
                             </button>
                         </div>
-                        <div class="grid grid-cols-7 px-3 pt-3 pb-1 gap-0">
+                        <div class="grid grid-cols-7 px-3 pt-2.5 pb-1">
                             @foreach(['Sen','Sel','Rab','Kam','Jum','Sab','Min'] as $d)
-                                <div class="text-center text-[10px] font-bold text-gray-400 uppercase">{{ $d }}</div>
+                                <div class="text-center text-[10px] font-medium text-gray-400 uppercase">{{ $d }}</div>
                             @endforeach
                         </div>
-                        <div class="grid grid-cols-7 px-3 pb-3 gap-y-1">
+                        <div class="grid grid-cols-7 px-3 pb-3 gap-y-0.5">
                             <template x-for="cell in cells" :key="cell.key">
                                 <button
                                     type="button"
-                                    class="mx-auto w-9 h-9 rounded-full flex items-center justify-center text-sm font-medium transition-colors"
+                                    class="mx-auto w-8 h-8 rounded-full flex items-center justify-center text-xs font-medium transition-colors"
                                     :class="{
-                                        'bg-emerald-700 text-white font-bold': cell.isSelected,
+                                        'bg-gray-800 text-white': cell.isSelected,
                                         'text-gray-300 cursor-default pointer-events-none': cell.isDisabled && !cell.isSelected,
-                                        'text-gray-800 hover:bg-emerald-50 hover:text-emerald-800': !cell.isDisabled && !cell.isSelected
+                                        'text-gray-700 hover:bg-gray-100': !cell.isDisabled && !cell.isSelected
                                     }"
                                     :disabled="cell.isDisabled"
                                     @click="select(cell.date)"
@@ -610,9 +607,9 @@ new class extends Component
                                 ></button>
                             </template>
                         </div>
-                        <div class="px-4 py-2.5 bg-amber-50 border-t border-amber-100 flex items-center gap-2">
-                            <svg width="13" height="13" viewBox="0 0 13 13" fill="none" class="text-amber-500 flex-shrink-0"><circle cx="6.5" cy="6.5" r="5.5" stroke="currentColor" stroke-width="1.3"/><path d="M6.5 4v3.5M6.5 9v.3" stroke="currentColor" stroke-width="1.3" stroke-linecap="round"/></svg>
-                            <span class="text-xs text-amber-700 font-medium">Minimal pemesanan H+2 dari hari ini</span>
+                        <div class="px-3 py-2 bg-amber-50 border-t border-amber-100 flex items-center gap-2">
+                            <svg width="12" height="12" viewBox="0 0 13 13" fill="none" class="text-amber-500 flex-shrink-0"><circle cx="6.5" cy="6.5" r="5.5" stroke="currentColor" stroke-width="1.3"/><path d="M6.5 4v3.5M6.5 9v.3" stroke="currentColor" stroke-width="1.3" stroke-linecap="round"/></svg>
+                            <span class="text-xs text-amber-700">Minimal pemesanan H+2 dari hari ini</span>
                         </div>
                     </div>
                     @error('booking_date') <p class="mt-1.5 text-xs text-red-600">{{ $message }}</p> @enderror
@@ -620,14 +617,17 @@ new class extends Component
 
                 {{-- Jam --}}
                 <div>
-                    <label class="block text-xs font-bold tracking-widest uppercase text-gray-500 mb-2">Jam Kunjungan</label>
-                    <div class="grid grid-cols-3 gap-2 sm:grid-cols-4">
+                    <label class="block text-[10px] font-medium uppercase tracking-widest text-gray-400 mb-1.5">Jam kunjungan</label>
+                    <div class="grid grid-cols-3 gap-1.5 sm:grid-cols-4">
                         @foreach ($timeSlots as $ts)
                             @php $tsSelected = (int)($time_slot_id ?? 0) === (int)$ts['id']; @endphp
                             <button
                                 type="button"
                                 wire:click="selectTimeSlot({{ $ts['id'] }})"
-                                class="rounded-xl border-2 py-3 text-sm font-semibold transition-all {{ $tsSelected ? 'border-emerald-700 bg-emerald-700 text-white' : 'border-gray-200 bg-white text-gray-700 hover:border-emerald-300 hover:bg-emerald-50' }}"
+                                class="rounded-lg border py-2.5 text-sm font-medium transition-all
+                                    {{ $tsSelected
+                                        ? 'border-gray-800 bg-gray-800 text-white'
+                                        : 'border-gray-200 bg-gray-50 text-gray-700 hover:border-gray-400' }}"
                             >
                                 {{ substr((string) $ts['start_time'], 0, 5) }}
                             </button>
@@ -638,26 +638,28 @@ new class extends Component
 
                 {{-- Lot --}}
                 <div>
-                    <div class="flex items-center justify-between mb-2">
-                        <label class="block text-xs font-bold tracking-widest uppercase text-gray-500">Nomor Lot</label>
+                    <div class="flex items-center justify-between mb-1.5">
+                        <label class="block text-[10px] font-medium uppercase tracking-widest text-gray-400">Nomor lot</label>
                         @if ($zone_id && $booking_date && $time_slot_id)
-                            <span class="text-xs font-semibold text-emerald-700 bg-emerald-50 border border-emerald-200 px-2 py-0.5 rounded-full">{{ count($availableLots) }} tersedia</span>
+                            <span class="text-[10px] font-medium text-gray-500 bg-gray-100 border border-gray-200 rounded-full px-2 py-0.5">
+                                {{ count($availableLots) }} tersedia
+                            </span>
                         @endif
                     </div>
 
                     @if (!$zone_id || !$booking_date || !$time_slot_id)
-                        <div class="flex gap-2.5 items-start bg-gray-50 border border-gray-200 rounded-xl p-3.5">
-                            <svg class="text-gray-400 flex-shrink-0 mt-0.5" width="14" height="14" viewBox="0 0 14 14" fill="none"><circle cx="7" cy="7" r="6" stroke="currentColor" stroke-width="1.3"/><path d="M7 4.5v4M7 10v.3" stroke="currentColor" stroke-width="1.3" stroke-linecap="round"/></svg>
-                            <p class="text-sm text-gray-500">Pilih zona, tanggal, dan jam terlebih dahulu untuk melihat lot tersedia.</p>
+                        <div class="flex gap-2 items-start bg-gray-50 border border-gray-200 rounded-lg p-3">
+                            <svg class="text-gray-400 flex-shrink-0 mt-0.5" width="13" height="13" viewBox="0 0 14 14" fill="none"><circle cx="7" cy="7" r="6" stroke="currentColor" stroke-width="1.3"/><path d="M7 4.5v4M7 10v.3" stroke="currentColor" stroke-width="1.3" stroke-linecap="round"/></svg>
+                            <p class="text-sm text-gray-500">Pilih zona, tanggal, dan jam terlebih dahulu.</p>
                         </div>
                     @else
-                        <div class="relative mb-3">
-                            <svg class="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 pointer-events-none" width="15" height="15" viewBox="0 0 15 15" fill="none"><circle cx="6.5" cy="6.5" r="5" stroke="currentColor" stroke-width="1.4"/><path d="M10.5 10.5l2.5 2.5" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"/></svg>
+                        <div class="relative mb-2">
+                            <svg class="absolute left-2.5 top-1/2 -translate-y-1/2 text-gray-400 pointer-events-none" width="13" height="13" viewBox="0 0 15 15" fill="none"><circle cx="6.5" cy="6.5" r="5" stroke="currentColor" stroke-width="1.4"/><path d="M10.5 10.5l2.5 2.5" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"/></svg>
                             <input
                                 wire:model.live.debounce.200ms="lot_search"
                                 type="text"
                                 placeholder="Cari nomor lot…"
-                                class="block w-full rounded-xl border-2 border-gray-200 bg-white pl-9 pr-3 py-2.5 text-sm text-gray-800 placeholder-gray-400 focus:border-emerald-600 focus:outline-none focus:ring-0 transition-colors"
+                                class="block w-full rounded-lg border border-gray-200 bg-gray-50 pl-8 pr-3 py-2 text-sm text-gray-800 placeholder-gray-400 focus:border-gray-500 focus:ring-0 focus:outline-none transition-colors"
                             >
                         </div>
 
@@ -673,15 +675,18 @@ new class extends Component
                         @endphp
 
                         @if (count($lotsToShow) === 0)
-                            <div class="py-8 text-center text-sm text-gray-500">Lot tidak ditemukan.</div>
+                            <div class="py-6 text-center text-sm text-gray-400">Lot tidak ditemukan.</div>
                         @else
-                            <div class="grid grid-cols-3 gap-2 sm:grid-cols-4">
+                            <div class="grid grid-cols-4 gap-1.5 max-h-44 overflow-y-auto sm:grid-cols-5">
                                 @foreach ($lotsToShow as $lot)
                                     @php $lotSel = (int)($lot_id ?? 0) === (int)$lot['id']; @endphp
                                     <button
                                         type="button"
                                         wire:click="selectLot({{ $lot['id'] }})"
-                                        class="rounded-xl border-2 py-3 text-sm font-semibold transition-all {{ $lotSel ? 'border-emerald-700 bg-emerald-700 text-white' : 'border-gray-200 bg-white text-gray-700 hover:border-emerald-300 hover:bg-emerald-50' }}"
+                                        class="rounded-lg border py-2 font-mono text-xs font-medium transition-all
+                                            {{ $lotSel
+                                                ? 'border-gray-800 bg-gray-800 text-white'
+                                                : 'border-gray-200 bg-gray-50 text-gray-600 hover:border-gray-400' }}"
                                     >
                                         {{ $lot['number'] }}
                                     </button>
@@ -697,45 +702,45 @@ new class extends Component
         @endif
 
 
-        {{-- ──────────────────────────────────────
-             STEP 3 — Fasilitas
-        ────────────────────────────────────── --}}
+        {{-- ── STEP 3 — Fasilitas ── --}}
         @if ($currentStep === 3)
-            <div class="px-5 pt-5 pb-1">
-                <h2 class="text-base font-bold text-gray-900">Fasilitas</h2>
-                <p class="text-sm text-gray-500 mt-0.5">Pilih fasilitas yang Anda butuhkan</p>
+            <div class="px-5 pt-5 pb-0">
+                <h2 class="text-base font-medium text-gray-900">Fasilitas</h2>
+                <p class="text-sm text-gray-400 mt-0.5">Pilih fasilitas yang Anda butuhkan</p>
             </div>
-            <div class="px-5 py-4 space-y-5">
+            <div class="px-5 py-4 space-y-4">
 
                 {{-- Counters --}}
                 <div>
-                    <label class="block text-xs font-bold tracking-widest uppercase text-gray-500 mb-3">Jumlah Item</label>
-                    <div class="rounded-xl border-2 border-gray-200 overflow-hidden divide-y divide-gray-200">
-
+                    <label class="block text-[10px] font-medium uppercase tracking-widest text-gray-400 mb-2">Jumlah item</label>
+                    <div class="rounded-lg border border-gray-200 overflow-hidden divide-y divide-gray-100">
                         @foreach ([
                             ['label' => 'Tenda',      'hint' => 'Min 1 — Maks 2',  'prop' => 'tent_count',        'min' => 1, 'max' => 2,  'val' => $tent_count],
                             ['label' => 'Kursi',      'hint' => 'Min 5 — Maks 10', 'prop' => 'chair_count',       'min' => 5, 'max' => 10, 'val' => $chair_count],
                             ['label' => 'Tong Bakar', 'hint' => 'Min 0 — Maks 2',  'prop' => 'burn_barrel_count', 'min' => 0, 'max' => 2,  'val' => $burn_barrel_count],
                         ] as $item)
-                            <div class="flex items-center justify-between bg-white px-4 py-3.5">
+                            <div class="flex items-center justify-between bg-white px-4 py-3">
                                 <div>
-                                    <p class="text-sm font-semibold text-gray-800">{{ $item['label'] }}</p>
+                                    <p class="text-sm font-medium text-gray-800">{{ $item['label'] }}</p>
                                     <p class="text-xs text-gray-400 mt-0.5">{{ $item['hint'] }}</p>
                                 </div>
-                                <div class="flex items-center border-2 border-gray-200 rounded-xl overflow-hidden">
+                                <div class="flex items-center border border-gray-200 rounded-lg overflow-hidden">
                                     <button type="button"
                                         wire:click="decrement('{{ $item['prop'] }}', {{ $item['min'] }})"
                                         @if ($item['val'] <= $item['min']) disabled @endif
-                                        class="w-10 h-10 flex items-center justify-center bg-gray-50 text-gray-600 text-lg font-medium hover:bg-gray-100 disabled:opacity-30 disabled:cursor-not-allowed transition-colors">−</button>
-                                    <span class="w-10 text-center text-sm font-bold text-gray-900 select-none">{{ $item['val'] }}</span>
+                                        class="w-9 h-9 flex items-center justify-center bg-gray-50 text-gray-600 text-base hover:bg-gray-100 disabled:opacity-30 disabled:cursor-not-allowed transition-colors">
+                                        −
+                                    </button>
+                                    <span class="w-9 text-center text-sm font-medium text-gray-900 select-none">{{ $item['val'] }}</span>
                                     <button type="button"
                                         wire:click="increment('{{ $item['prop'] }}', {{ $item['max'] }})"
                                         @if ($item['val'] >= $item['max']) disabled @endif
-                                        class="w-10 h-10 flex items-center justify-center bg-gray-50 text-gray-600 text-lg font-medium hover:bg-gray-100 disabled:opacity-30 disabled:cursor-not-allowed transition-colors">+</button>
+                                        class="w-9 h-9 flex items-center justify-center bg-gray-50 text-gray-600 text-base hover:bg-gray-100 disabled:opacity-30 disabled:cursor-not-allowed transition-colors">
+                                        +
+                                    </button>
                                 </div>
                             </div>
                         @endforeach
-
                     </div>
                     @error('tent_count')        <p class="mt-1.5 text-xs text-red-600">{{ $message }}</p> @enderror
                     @error('chair_count')       <p class="mt-1.5 text-xs text-red-600">{{ $message }}</p> @enderror
@@ -744,36 +749,26 @@ new class extends Component
 
                 {{-- Toggles --}}
                 <div>
-                    <label class="block text-xs font-bold tracking-widest uppercase text-gray-500 mb-3">Perlengkapan Tambahan</label>
-                    <div class="space-y-2.5">
+                    <label class="block text-[10px] font-medium uppercase tracking-widest text-gray-400 mb-2">Perlengkapan tambahan</label>
+                    <div class="space-y-2">
 
-                        {{-- Meja Sembayang --}}
-                        <button type="button" wire:click="toggle('prayer_table')" class="w-full flex items-center justify-between px-4 py-3.5 rounded-xl border-2 cursor-pointer transition-all {{ $prayer_table ? 'border-emerald-600 bg-emerald-50' : 'border-gray-200 bg-white hover:border-gray-300' }}">
-                            <div class="flex items-center gap-3">
-                                <div class="w-8 h-8 rounded-lg flex items-center justify-center flex-shrink-0 {{ $prayer_table ? 'bg-emerald-700' : 'bg-gray-100' }}">
-                                    <svg width="15" height="15" viewBox="0 0 15 15" fill="none" class="{{ $prayer_table ? 'text-white' : 'text-gray-500' }}"><rect x="2" y="5" width="11" height="7" rx="1.2" stroke="currentColor" stroke-width="1.3"/><path d="M5 5V4a2.5 2.5 0 015 0v1" stroke="currentColor" stroke-width="1.3"/></svg>
-                                </div>
-                                <span class="text-sm font-semibold {{ $prayer_table ? 'text-emerald-900' : 'text-gray-800' }}">Meja Sembayang</span>
-                            </div>
+                        <button type="button" wire:click="toggle('prayer_table')"
+                            class="w-full flex items-center justify-between px-4 py-3 rounded-lg border cursor-pointer transition-all
+                                {{ $prayer_table ? 'border-gray-800 bg-white' : 'border-gray-200 bg-gray-50 hover:border-gray-300' }}">
+                            <span class="text-sm font-medium text-gray-800">Meja Sembayang</span>
                             <div class="relative flex-shrink-0">
-                                <input type="checkbox" class="sr-only" @checked($prayer_table) tabindex="-1" aria-hidden="true">
-                                <div class="w-11 h-6 rounded-full transition-colors {{ $prayer_table ? 'bg-emerald-600' : 'bg-gray-200' }}"></div>
-                                <div class="absolute top-0.5 w-5 h-5 bg-white rounded-full shadow transition-all {{ $prayer_table ? 'left-5' : 'left-0.5' }}"></div>
+                                <div class="w-10 h-5 rounded-full transition-colors {{ $prayer_table ? 'bg-gray-800' : 'bg-gray-200' }}"></div>
+                                <div class="absolute top-0.5 w-4 h-4 bg-white rounded-full shadow transition-all {{ $prayer_table ? 'left-[22px]' : 'left-0.5' }}"></div>
                             </div>
                         </button>
 
-                        {{-- Lampu --}}
-                        <button type="button" wire:click="toggle('lamp')" class="w-full flex items-center justify-between px-4 py-3.5 rounded-xl border-2 cursor-pointer transition-all {{ $lamp ? 'border-emerald-600 bg-emerald-50' : 'border-gray-200 bg-white hover:border-gray-300' }}">
-                            <div class="flex items-center gap-3">
-                                <div class="w-8 h-8 rounded-lg flex items-center justify-center flex-shrink-0 {{ $lamp ? 'bg-emerald-700' : 'bg-gray-100' }}">
-                                    <svg width="15" height="15" viewBox="0 0 15 15" fill="none" class="{{ $lamp ? 'text-white' : 'text-gray-500' }}"><path d="M7.5 1.5a4 4 0 00-2 7.464V11h4V8.964A4 4 0 007.5 1.5z" stroke="currentColor" stroke-width="1.3" stroke-linejoin="round"/><path d="M5.5 11h4v1.5a.5.5 0 01-.5.5h-3a.5.5 0 01-.5-.5V11z" stroke="currentColor" stroke-width="1.3"/></svg>
-                                </div>
-                                <span class="text-sm font-semibold {{ $lamp ? 'text-emerald-900' : 'text-gray-800' }}">Lampu</span>
-                            </div>
+                        <button type="button" wire:click="toggle('lamp')"
+                            class="w-full flex items-center justify-between px-4 py-3 rounded-lg border cursor-pointer transition-all
+                                {{ $lamp ? 'border-gray-800 bg-white' : 'border-gray-200 bg-gray-50 hover:border-gray-300' }}">
+                            <span class="text-sm font-medium text-gray-800">Lampu</span>
                             <div class="relative flex-shrink-0">
-                                <input type="checkbox" class="sr-only" @checked($lamp) tabindex="-1" aria-hidden="true">
-                                <div class="w-11 h-6 rounded-full transition-colors {{ $lamp ? 'bg-emerald-600' : 'bg-gray-200' }}"></div>
-                                <div class="absolute top-0.5 w-5 h-5 bg-white rounded-full shadow transition-all {{ $lamp ? 'left-5' : 'left-0.5' }}"></div>
+                                <div class="w-10 h-5 rounded-full transition-colors {{ $lamp ? 'bg-gray-800' : 'bg-gray-200' }}"></div>
+                                <div class="absolute top-0.5 w-4 h-4 bg-white rounded-full shadow transition-all {{ $lamp ? 'left-[22px]' : 'left-0.5' }}"></div>
                             </div>
                         </button>
 
@@ -784,47 +779,45 @@ new class extends Component
         @endif
 
 
-        {{-- ──────────────────────────────────────
-             STEP 4 — Data Diri & Konfirmasi
-        ────────────────────────────────────── --}}
+        {{-- ── STEP 4 — Data Diri & Konfirmasi ── --}}
         @if ($currentStep === 4)
-            <div class="px-5 pt-5 pb-1">
-                <h2 class="text-base font-bold text-gray-900">Data Diri</h2>
-                <p class="text-sm text-gray-500 mt-0.5">Isi informasi kontak untuk konfirmasi booking</p>
+            <div class="px-5 pt-5 pb-0">
+                <h2 class="text-base font-medium text-gray-900">Data Diri</h2>
+                <p class="text-sm text-gray-400 mt-0.5">Isi informasi kontak untuk konfirmasi booking</p>
             </div>
             <div class="px-5 py-4 space-y-4">
 
                 <div>
-                    <label class="block text-xs font-bold tracking-widest uppercase text-gray-500 mb-1.5" for="bk-name">Nama Lengkap</label>
+                    <label class="block text-[10px] font-medium uppercase tracking-widest text-gray-400 mb-1.5" for="bk-name">Nama lengkap</label>
                     <input id="bk-name" wire:model="name" type="text" placeholder="cth. Budi Santoso"
-                        class="block w-full rounded-xl border-2 border-gray-200 px-3.5 py-2.5 text-sm text-gray-800 placeholder-gray-400 focus:border-emerald-600 focus:outline-none focus:ring-0 transition-colors">
+                        class="block w-full rounded-lg border border-gray-200 bg-gray-50 px-3 py-2.5 text-sm text-gray-800 placeholder-gray-400 focus:border-gray-500 focus:ring-0 focus:outline-none transition-colors">
                     @error('name') <p class="mt-1.5 text-xs text-red-600">{{ $message }}</p> @enderror
                 </div>
 
                 <div>
-                    <label class="block text-xs font-bold tracking-widest uppercase text-gray-500 mb-1.5" for="bk-email">Alamat Email</label>
+                    <label class="block text-[10px] font-medium uppercase tracking-widest text-gray-400 mb-1.5" for="bk-email">Alamat email</label>
                     <input id="bk-email" wire:model="email" type="email" placeholder="cth. budi@email.com"
-                        class="block w-full rounded-xl border-2 border-gray-200 px-3.5 py-2.5 text-sm text-gray-800 placeholder-gray-400 focus:border-emerald-600 focus:outline-none focus:ring-0 transition-colors">
+                        class="block w-full rounded-lg border border-gray-200 bg-gray-50 px-3 py-2.5 text-sm text-gray-800 placeholder-gray-400 focus:border-gray-500 focus:ring-0 focus:outline-none transition-colors">
                     @error('email') <p class="mt-1.5 text-xs text-red-600">{{ $message }}</p> @enderror
                 </div>
 
                 <div>
-                    <label class="block text-xs font-bold tracking-widest uppercase text-gray-500 mb-1.5" for="bk-phone">Nomor HP</label>
+                    <label class="block text-[10px] font-medium uppercase tracking-widest text-gray-400 mb-1.5" for="bk-phone">Nomor HP</label>
                     <input id="bk-phone" wire:model="phone" type="text" placeholder="cth. 0812-3456-7890"
-                        class="block w-full rounded-xl border-2 border-gray-200 px-3.5 py-2.5 text-sm text-gray-800 placeholder-gray-400 focus:border-emerald-600 focus:outline-none focus:ring-0 transition-colors">
+                        class="block w-full rounded-lg border border-gray-200 bg-gray-50 px-3 py-2.5 text-sm text-gray-800 placeholder-gray-400 focus:border-gray-500 focus:ring-0 focus:outline-none transition-colors">
                     @error('phone') <p class="mt-1.5 text-xs text-red-600">{{ $message }}</p> @enderror
                 </div>
 
-                {{-- Summary --}}
+                {{-- Ringkasan --}}
                 @php
                     $loc = collect($locations)->firstWhere('id', $location_id);
                     $zn  = collect($zones)->firstWhere('id', $zone_id);
                     $lt  = collect($availableLots)->firstWhere('id', $lot_id);
                     $t   = collect($timeSlots)->firstWhere('id', $time_slot_id);
                 @endphp
-                <div class="rounded-xl border-2 border-gray-200 overflow-hidden mt-2">
-                    <div class="bg-emerald-800 px-4 py-3">
-                        <p class="text-xs font-bold uppercase tracking-widest text-emerald-100">Ringkasan Booking</p>
+                <div class="rounded-lg border border-gray-200 overflow-hidden">
+                    <div class="bg-gray-800 px-4 py-2.5">
+                        <p class="text-[10px] font-medium uppercase tracking-widest text-gray-400">Ringkasan Booking</p>
                     </div>
                     <div class="bg-white divide-y divide-gray-100">
                         @foreach([
@@ -833,26 +826,26 @@ new class extends Component
                             'Lot'     => is_array($lt)  ? ($lt['number'] ?? '—') : '—',
                             'Tanggal' => $booking_date ?? '—',
                         ] as $k => $v)
-                            <div class="flex items-center px-4 py-3 gap-3">
-                                <span class="w-16 flex-shrink-0 text-xs text-gray-400 font-medium">{{ $k }}</span>
-                                <span class="text-sm font-semibold text-gray-800">{{ $v }}</span>
+                            <div class="flex items-center px-4 py-2.5 gap-3">
+                                <span class="w-14 flex-shrink-0 text-xs text-gray-400">{{ $k }}</span>
+                                <span class="text-sm font-medium text-gray-900">{{ $v }}</span>
                             </div>
                         @endforeach
-                        <div class="flex items-center px-4 py-3 gap-3">
-                            <span class="w-16 flex-shrink-0 text-xs text-gray-400 font-medium">Jam</span>
-                            <span class="text-sm font-semibold text-gray-800">
+                        <div class="flex items-center px-4 py-2.5 gap-3">
+                            <span class="w-14 flex-shrink-0 text-xs text-gray-400">Jam</span>
+                            <span class="text-sm font-medium text-gray-900">
                                 @if (is_array($t))
                                     {{ substr((string)($t['start_time'] ?? ''), 0, 5) }} – {{ substr((string)($t['end_time'] ?? ''), 0, 5) }}
                                 @else —
                                 @endif
                             </span>
                         </div>
-                        <div class="flex items-start px-4 py-3 gap-3">
-                            <span class="w-16 flex-shrink-0 text-xs text-gray-400 font-medium mt-0.5">Fasilitas</span>
-                            <div class="text-xs text-gray-700 leading-relaxed">
+                        <div class="flex items-start px-4 py-2.5 gap-3">
+                            <span class="w-14 flex-shrink-0 text-xs text-gray-400 mt-0.5">Fasilitas</span>
+                            <span class="text-xs text-gray-700 leading-relaxed">
                                 Tenda {{ $tent_count }} · Kursi {{ $chair_count }} · Tong {{ $burn_barrel_count }}<br>
                                 Meja: {{ $prayer_table ? 'Ya' : 'Tidak' }} · Lampu: {{ $lamp ? 'Ya' : 'Tidak' }}
-                            </div>
+                            </span>
                         </div>
                     </div>
                 </div>
@@ -860,25 +853,23 @@ new class extends Component
                 <button
                     type="button"
                     wire:click="submit"
-                    class="flex w-full items-center justify-center gap-2 rounded-xl bg-emerald-800 px-5 py-4 text-sm font-bold text-white hover:bg-emerald-700 active:scale-[.98] transition-all">
-                    <svg width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M2.5 8h11M8 2.5l5.5 5.5L8 13.5" stroke="white" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/></svg>
+                    class="flex w-full items-center justify-center gap-2 rounded-lg bg-gray-800 px-5 py-3.5 text-sm font-medium text-white hover:bg-gray-700 active:scale-[.99] transition-all">
                     Konfirmasi &amp; Kirim Booking
+                    <svg width="14" height="14" viewBox="0 0 16 16" fill="none"><path d="M2.5 8h11M8 2.5l5.5 5.5L8 13.5" stroke="white" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg>
                 </button>
 
             </div>
         @endif
 
 
-        {{-- ──────────────────────────────────────
-             NAV BAR
-        ────────────────────────────────────── --}}
-        <div class="flex items-center justify-between px-5 py-4 border-t border-gray-100 bg-gray-50">
+        {{-- ── NAV BAR ── --}}
+        <div class="flex items-center justify-between px-5 py-3.5 border-t border-gray-100 bg-gray-50">
             <button
                 type="button"
                 wire:click="prevStep"
                 @if ($currentStep === 1) disabled @endif
-                class="flex items-center gap-1.5 rounded-xl border-2 border-gray-200 bg-white px-4 py-2.5 text-sm font-semibold text-gray-600 hover:bg-gray-100 disabled:opacity-30 disabled:cursor-not-allowed transition-all active:scale-[.97]">
-                <svg width="13" height="13" viewBox="0 0 13 13" fill="none"><path d="M8.5 10.5L4.5 6.5l4-4" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/></svg>
+                class="inline-flex items-center gap-1.5 rounded-lg border border-gray-200 bg-white px-4 py-2 text-sm font-medium text-gray-600 hover:bg-gray-50 disabled:opacity-30 disabled:cursor-not-allowed transition-all active:scale-[.98]">
+                <svg width="12" height="12" viewBox="0 0 13 13" fill="none"><path d="M8.5 10.5L4.5 6.5l4-4" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/></svg>
                 Kembali
             </button>
 
@@ -896,9 +887,9 @@ new class extends Component
                     type="button"
                     wire:click="nextStep"
                     @if (!$canNext) disabled @endif
-                    class="flex items-center gap-1.5 rounded-xl bg-emerald-800 px-5 py-2.5 text-sm font-bold text-white hover:bg-emerald-700 disabled:opacity-30 disabled:cursor-not-allowed transition-all active:scale-[.97]">
+                    class="inline-flex items-center gap-1.5 rounded-lg bg-gray-800 px-5 py-2 text-sm font-medium text-white hover:bg-gray-700 disabled:opacity-30 disabled:cursor-not-allowed transition-all active:scale-[.98]">
                     Lanjut
-                    <svg width="13" height="13" viewBox="0 0 13 13" fill="none"><path d="M4.5 2.5l4 4-4 4" stroke="white" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/></svg>
+                    <svg width="12" height="12" viewBox="0 0 13 13" fill="none"><path d="M4.5 2.5l4 4-4 4" stroke="white" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/></svg>
                 </button>
             @endif
         </div>

@@ -28,12 +28,11 @@ class SendDiscordNotificationJob implements ShouldQueue
         $bookings = $this->queryBookingsForDate($targetDate);
 
         if ($bookings->isEmpty()) {
-            $discord->send($this->buildEmptyMessageForDate($targetDate), null);
             return;
         }
 
         $filePath = $excel->generate($bookings, $targetDate);
-        $discord->send($this->buildSummaryMessageForDate($targetDate, $bookings), $filePath);
+        $discord->send("\u{200B}", $filePath, $this->buildSummaryEmbedsForDate($targetDate, $bookings));
 
         File::delete($filePath);
     }
@@ -51,14 +50,7 @@ class SendDiscordNotificationJob implements ShouldQueue
             ->get();
     }
 
-    private function buildEmptyMessageForDate(string $targetDate): string
-    {
-        $dateLabel = \Carbon\Carbon::parse($targetDate)->locale('id')->translatedFormat('d F Y');
-
-        return "📋 **Laporan Booking Ziarah (Besok)**\n📅 Tanggal Ziarah: {$dateLabel}\n\nTidak ada booking untuk tanggal ini.";
-    }
-
-    private function buildSummaryMessageForDate(string $targetDate, Collection $bookings): string
+    private function buildSummaryEmbedsForDate(string $targetDate, Collection $bookings): array
     {
         $dateLabel = \Carbon\Carbon::parse($targetDate)->locale('id')->translatedFormat('d F Y');
 
@@ -79,6 +71,20 @@ class SendDiscordNotificationJob implements ShouldQueue
             $totLamp += ($f?->lamp ?? false) ? 1 : 0;
         }
 
-        return "📋 **Laporan Booking Ziarah (Besok)**\n📅 Tanggal Ziarah: {$dateLabel}\n\n📊 **Ringkasan:**\n• Total Booking: {$totalBooking}\n• Total Tenda: {$totTent}\n• Total Kursi: {$totChair}\n• Total Tong Bakar: {$totBarrel}\n• Meja Sembayang: {$totTable} booking\n• Lampu: {$totLamp} booking\n\n📎 Detail lengkap terlampir.";
+        $desc = "📅 **Tanggal Ziarah:** {$dateLabel}\n\n"
+            ."📊 **Ringkasan:**\n"
+            ."- Total Booking: {$totalBooking}\n"
+            ."- Total Tenda: {$totTent}\n"
+            ."- Total Kursi: {$totChair}\n"
+            ."- Total Tong Bakar: {$totBarrel}\n"
+            ."- Meja Sembayang: {$totTable} booking\n"
+            ."- Lampu: {$totLamp} booking\n\n"
+            ."📎 Detail lengkap terlampir.";
+
+        return [[
+            'title' => 'Laporan Booking Ziarah (Besok)',
+            'description' => $desc,
+            'color' => 0x065F46,
+        ]];
     }
 }

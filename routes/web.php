@@ -26,8 +26,16 @@ Route::get('/booking/success/{code}', function (string $code) {
 })->name('booking.success');
 
 Route::get('/dashboard', function () {
-    return view('dashboard');
-})->middleware(['auth', 'verified'])->name('dashboard');
+    $user = auth()->user();
+    if ($user?->role === 'admin') {
+        return redirect()->route('admin.dashboard');
+    }
+    if ($user?->role === 'pic') {
+        return redirect()->route('pic.dashboard');
+    }
+
+    return redirect('/');
+})->middleware(['auth'])->name('dashboard');
 
 Route::prefix('admin')->middleware(['auth', 'role:admin'])->group(function () {
     Route::get('/dashboard', [AdminDashboardController::class, 'index'])->name('admin.dashboard');

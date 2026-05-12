@@ -12,7 +12,7 @@ class DiscordService
     {
     }
 
-    public function send(string $message, ?string $filePath = null): void
+    public function send(string $message, ?string $filePath = null, array $embeds = []): void
     {
         $settings = DiscordSetting::query()->first();
         $webhookUrl = $settings?->webhook_url;
@@ -23,10 +23,15 @@ class DiscordService
         }
 
         try {
+            $payload = ['content' => $message];
+            if (!empty($embeds)) {
+                $payload['embeds'] = $embeds;
+            }
+
             $multipart = [
                 [
                     'name' => 'payload_json',
-                    'contents' => json_encode(['content' => $message], JSON_UNESCAPED_UNICODE),
+                    'contents' => json_encode($payload, JSON_UNESCAPED_UNICODE),
                 ],
             ];
 
