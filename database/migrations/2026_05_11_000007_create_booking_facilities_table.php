@@ -1,0 +1,34 @@
+<?php
+
+use Illuminate\Database\Migrations\Migration;
+use Illuminate\Database\Schema\Blueprint;
+use Illuminate\Support\Facades\Schema;
+
+return new class extends Migration
+{
+    /**
+     * Run the migrations.
+     */
+    public function up(): void
+    {
+        Schema::create('booking_facilities', function (Blueprint $table) {
+            $table->id();
+            $table->foreignId('booking_id')->constrained('bookings')->cascadeOnDelete();
+            $table->smallInteger('tent_count');
+            $table->smallInteger('chair_count');
+            $table->smallInteger('burn_barrel_count');
+            $table->boolean('prayer_table')->default(false);
+            $table->boolean('lamp')->default(false);
+            $table->timestamps();
+        });
+    }
+
+    /**
+     * Reverse the migrations.
+     */
+    public function down(): void
+    {
+        Schema::dropIfExists('booking_facilities');
+    }
+};
+
