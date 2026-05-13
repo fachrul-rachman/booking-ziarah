@@ -14,6 +14,7 @@ class Booking extends Model
     protected $fillable = [
         'booking_code',
         'name',
+        'relationship',
         'email',
         'phone',
         'lot_id',
@@ -52,4 +53,3 @@ class Booking extends Model
         return $this->hasOne(BookingFacility::class);
     }
 }
-

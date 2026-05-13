@@ -29,6 +29,7 @@
             <div class="text-sm font-semibold text-gray-900">Data Pemesan</div>
             <div class="mt-3 space-y-2 text-sm text-gray-900">
                 <div><span class="font-semibold">Nama:</span> {{ $booking->name }}</div>
+                <div><span class="font-semibold">Hubungan:</span> {{ $booking->relationship ?? '-' }}</div>
                 <div><span class="font-semibold">Email:</span> {{ $booking->email }}</div>
                 <div><span class="font-semibold">No. HP:</span> {{ $booking->phone }}</div>
             </div>
@@ -60,4 +61,3 @@
         <a href="{{ route('pic.dashboard') }}" class="rounded-md bg-gray-200 px-4 py-2 text-sm font-semibold text-gray-900 hover:bg-gray-300">Kembali</a>
     </div>
 </x-layouts.pic>
-

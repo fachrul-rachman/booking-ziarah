@@ -10,6 +10,7 @@
 
         <div class="mt-5 space-y-2 text-sm text-gray-900">
             <div><span class="font-semibold">Nama:</span> {{ $booking->name }}</div>
+            <div><span class="font-semibold">Hubungan:</span> {{ $booking->relationship ?? '-' }}</div>
             <div><span class="font-semibold">Email:</span> {{ $booking->email }}</div>
             <div><span class="font-semibold">No. HP:</span> {{ $booking->phone }}</div>
             <div><span class="font-semibold">Lokasi:</span> {{ $booking->lot->zone->location->name }}</div>
@@ -35,4 +36,3 @@
         </div>
     </div>
 </x-layouts.public>
-

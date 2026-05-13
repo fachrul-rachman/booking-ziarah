@@ -50,32 +50,33 @@ class ExcelExportService
             $sheet->setCellValue("B{$row}", $jam);
             $sheet->setCellValue("C{$row}", (string) ($location?->name ?? ''));
             $sheet->setCellValue("D{$row}", (string) $booking->name);
-            $sheet->setCellValue("E{$row}", (string) $booking->phone);
-            $sheet->setCellValue("F{$row}", (string) ($zone?->name ?? ''));
-            $sheet->setCellValue("G{$row}", (string) ($lot?->number ?? ''));
+            $sheet->setCellValue("E{$row}", (string) ($booking->relationship ?? ''));
+            $sheet->setCellValue("F{$row}", (string) $booking->phone);
+            $sheet->setCellValue("G{$row}", (string) ($zone?->name ?? ''));
+            $sheet->setCellValue("H{$row}", (string) ($lot?->number ?? ''));
 
-            $sheet->setCellValue("H{$row}", (int) ($facility?->tent_count ?? 0));
-            $sheet->setCellValue("I{$row}", (int) ($facility?->chair_count ?? 0));
-            $sheet->setCellValue("J{$row}", (int) ($facility?->burn_barrel_count ?? 0));
-            $sheet->setCellValue("K{$row}", ($facility?->prayer_table ?? false) ? 'Ya' : 'Tidak');
-            $sheet->setCellValue("L{$row}", ($facility?->lamp ?? false) ? 'Ya' : 'Tidak');
+            $sheet->setCellValue("I{$row}", (int) ($facility?->tent_count ?? 0));
+            $sheet->setCellValue("J{$row}", (int) ($facility?->chair_count ?? 0));
+            $sheet->setCellValue("K{$row}", (int) ($facility?->burn_barrel_count ?? 0));
+            $sheet->setCellValue("L{$row}", ($facility?->prayer_table ?? false) ? 'Ya' : 'Tidak');
+            $sheet->setCellValue("M{$row}", ($facility?->lamp ?? false) ? 'Ya' : 'Tidak');
 
             $row++;
         }
 
         $lastDataRow = $dataStartRow + max(0, $count - 1);
         if ($count === 0) {
-            $sheet->setCellValue("H{$totalsRow}", 0);
             $sheet->setCellValue("I{$totalsRow}", 0);
             $sheet->setCellValue("J{$totalsRow}", 0);
             $sheet->setCellValue("K{$totalsRow}", 0);
             $sheet->setCellValue("L{$totalsRow}", 0);
+            $sheet->setCellValue("M{$totalsRow}", 0);
         } else {
-            $sheet->setCellValue("H{$totalsRow}", "=SUM(H{$dataStartRow}:H{$lastDataRow})");
             $sheet->setCellValue("I{$totalsRow}", "=SUM(I{$dataStartRow}:I{$lastDataRow})");
             $sheet->setCellValue("J{$totalsRow}", "=SUM(J{$dataStartRow}:J{$lastDataRow})");
-            $sheet->setCellValue("K{$totalsRow}", "=COUNTIF(K{$dataStartRow}:K{$lastDataRow},\"Ya\")");
+            $sheet->setCellValue("K{$totalsRow}", "=SUM(K{$dataStartRow}:K{$lastDataRow})");
             $sheet->setCellValue("L{$totalsRow}", "=COUNTIF(L{$dataStartRow}:L{$lastDataRow},\"Ya\")");
+            $sheet->setCellValue("M{$totalsRow}", "=COUNTIF(M{$dataStartRow}:M{$lastDataRow},\"Ya\")");
         }
 
         $dir = storage_path('app/tmp/discord_exports');

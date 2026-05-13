@@ -29,6 +29,7 @@ class StoreBookingRequest extends FormRequest
             'lamp' => ['required', 'boolean'],
 
             'name' => ['required', 'string', 'max:255'],
+            'relationship' => ['required', 'string', 'in:Suami,Istri,Anak,Kakak,Adik,Ipar,Mertua,Menantu,Paman,Bibi'],
             'email' => ['required', 'email', 'max:255'],
             'phone' => ['required', 'string', 'max:20'],
         ];

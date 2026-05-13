@@ -115,6 +115,7 @@ new class extends Component
     public bool $lamp = false;
 
     public string $name = '';
+    public string $relationship = '';
     public string $email = '';
     public string $phone = '';
 
@@ -186,6 +187,7 @@ new class extends Component
         $this->lamp = (bool) ($state['lamp'] ?? false);
 
         $this->name = (string) ($state['name'] ?? '');
+        $this->relationship = (string) ($state['relationship'] ?? '');
         $this->email = (string) ($state['email'] ?? '');
         $this->phone = (string) ($state['phone'] ?? '');
     }
@@ -207,6 +209,7 @@ new class extends Component
             'lamp' => $this->lamp,
 
             'name' => $this->name,
+            'relationship' => $this->relationship,
             'email' => $this->email,
             'phone' => $this->phone,
         ]);
@@ -363,6 +366,7 @@ new class extends Component
             ],
             4 => [
                 'name' => ['required', 'string', 'max:255'],
+                'relationship' => ['required', 'string', 'in:Suami,Istri,Anak,Kakak,Adik,Ipar,Mertua,Menantu,Paman,Bibi'],
                 'email' => ['required', 'email', 'max:255'],
                 'phone' => ['required', 'string', 'max:20'],
             ],
@@ -418,6 +422,7 @@ new class extends Component
                 $booking = Booking::query()->create([
                     'booking_code' => $bookingCode,
                     'name' => $validated['name'],
+                    'relationship' => $validated['relationship'],
                     'email' => $validated['email'],
                     'phone' => $validated['phone'],
                     'lot_id' => $validated['lot_id'],
@@ -795,6 +800,18 @@ new class extends Component
                 </div>
 
                 <div>
+                    <label class="block text-[10px] font-medium uppercase tracking-widest text-gray-400 mb-1.5" for="bk-relationship">Hubungan dengan Almarhum/ah</label>
+                    <select id="bk-relationship" wire:model="relationship"
+                        class="block w-full rounded-lg border border-gray-200 bg-gray-50 px-3 py-2.5 text-sm text-gray-800 focus:border-gray-500 focus:ring-0 focus:outline-none transition-colors">
+                        <option value="">Pilih hubungan</option>
+                        @foreach (['Suami','Istri','Anak','Kakak','Adik','Ipar','Mertua','Menantu','Paman','Bibi'] as $rel)
+                            <option value="{{ $rel }}">{{ $rel }}</option>
+                        @endforeach
+                    </select>
+                    @error('relationship') <p class="mt-1.5 text-xs text-red-600">{{ $message }}</p> @enderror
+                </div>
+
+                <div>
                     <label class="block text-[10px] font-medium uppercase tracking-widest text-gray-400 mb-1.5" for="bk-email">Alamat email</label>
                     <input id="bk-email" wire:model="email" type="email" placeholder="cth. budi@email.com"
                         class="block w-full rounded-lg border border-gray-200 bg-gray-50 px-3 py-2.5 text-sm text-gray-800 placeholder-gray-400 focus:border-gray-500 focus:ring-0 focus:outline-none transition-colors">
@@ -839,6 +856,10 @@ new class extends Component
                                 @else —
                                 @endif
                             </span>
+                        </div>
+                        <div class="flex items-center px-4 py-2.5 gap-3">
+                            <span class="w-14 flex-shrink-0 text-xs text-gray-400">Hubungan</span>
+                            <span class="text-sm font-medium text-gray-900">{{ $relationship !== '' ? $relationship : '—' }}</span>
                         </div>
                         <div class="flex items-start px-4 py-2.5 gap-3">
                             <span class="w-14 flex-shrink-0 text-xs text-gray-400 mt-0.5">Fasilitas</span>

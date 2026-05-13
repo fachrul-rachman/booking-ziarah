@@ -74,6 +74,10 @@
                     <dd class="font-medium text-gray-900">{{ $booking->name }}</dd>
                 </div>
                 <div class="flex items-center justify-between py-2">
+                    <dt class="text-gray-500">Hubungan</dt>
+                    <dd class="font-medium text-gray-900">{{ $booking->relationship ?? '-' }}</dd>
+                </div>
+                <div class="flex items-center justify-between py-2">
                     <dt class="text-gray-500">Email</dt>
                     <dd class="font-medium text-gray-900">{{ $booking->email }}</dd>
                 </div>
