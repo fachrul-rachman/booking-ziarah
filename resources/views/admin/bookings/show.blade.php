@@ -96,7 +96,7 @@
             <dl class="mt-1 divide-y divide-gray-50 text-sm">
                 <div class="flex items-center justify-between py-2">
                     <dt class="text-gray-500">Tenda</dt>
-                    <dd class="font-medium text-gray-900">{{ $booking->facility->tent_count }}</dd>
+                    <dd class="font-medium text-gray-900">{{ ($booking->facility->tent_count ?? 0) > 0 ? 'Ya' : 'Tidak' }}</dd>
                 </div>
                 <div class="flex items-center justify-between py-2">
                     <dt class="text-gray-500">Kursi</dt>

@@ -1,4 +1,4 @@
-<script>
+﻿<script>
     (function () {
         const _dpFactory = function ({ minDate, selected }) {
             const monthNames = ['Januari','Februari','Maret','April','Mei','Juni','Juli','Agustus','September','Oktober','November','Desember'];
@@ -166,6 +166,12 @@ new class extends Component
         $this->persistState();
     }
 
+    public function toggleTent(): void
+    {
+        $this->tent_count = $this->tent_count > 0 ? 0 : 1;
+        $this->persistState();
+    }
+
     private function restoreState(): void
     {
         $state = session()->get('booking_form_state');
@@ -180,7 +186,10 @@ new class extends Component
         $this->booking_date = $state['booking_date'] ?? null;
         $this->time_slot_id = $state['time_slot_id'] ?? null;
 
-        $this->tent_count = (int) ($state['tent_count'] ?? 1) ?: 1;
+        $this->tent_count = (int) ($state['tent_count'] ?? 1);
+        if ($this->tent_count > 1) {
+            $this->tent_count = 1;
+        }
         $this->chair_count = (int) ($state['chair_count'] ?? 5) ?: 5;
         $this->burn_barrel_count = (int) ($state['burn_barrel_count'] ?? 0) ?: 0;
         $this->prayer_table = (bool) ($state['prayer_table'] ?? false);
@@ -358,7 +367,7 @@ new class extends Component
                 'lot_id' => ['required', 'integer', 'exists:lots,id'],
             ],
             3 => [
-                'tent_count' => ['required', 'integer', 'min:1', 'max:2'],
+                'tent_count' => ['required', 'integer', 'min:0', 'max:1'],
                 'chair_count' => ['required', 'integer', 'min:5', 'max:10'],
                 'burn_barrel_count' => ['required', 'integer', 'min:0', 'max:2'],
                 'prayer_table' => ['required', 'boolean'],
@@ -462,7 +471,7 @@ new class extends Component
 
 <div class="mx-auto max-w-lg pb-10">
 
-    {{-- ══ STEPPER ══ --}}
+    {{-- â•â• STEPPER â•â• --}}
     @php $stepLabels = ['Lokasi', 'Zona & Lot', 'Fasilitas', 'Data Diri']; @endphp
     <div class="mt-6 flex items-center px-1">
         @foreach ($stepLabels as $i => $label)
@@ -496,7 +505,7 @@ new class extends Component
         @endforeach
     </div>
 
-    {{-- ══ MAIN CARD ══ --}}
+    {{-- â•â• MAIN CARD â•â• --}}
     <div class="mt-4 rounded-xl bg-white border border-gray-100 overflow-hidden">
 
         {{-- Global error --}}
@@ -508,7 +517,7 @@ new class extends Component
         @enderror
 
 
-        {{-- ── STEP 1 — Lokasi ── --}}
+        {{-- â”€â”€ STEP 1 — Lokasi â”€â”€ --}}
         @if ($currentStep === 1)
             <div class="px-5 pt-5 pb-0">
                 <h2 class="text-base font-medium text-gray-900">Pilih Lokasi</h2>
@@ -547,7 +556,7 @@ new class extends Component
         @endif
 
 
-        {{-- ── STEP 2 — Zona, Tanggal, Jam, Lot ── --}}
+        {{-- â”€â”€ STEP 2 — Zona, Tanggal, Jam, Lot â”€â”€ --}}
         @if ($currentStep === 2)
             <div class="px-5 pt-5 pb-0">
                 <h2 class="text-base font-medium text-gray-900">Zona, Tanggal &amp; Lot</h2>
@@ -560,7 +569,7 @@ new class extends Component
                     <label class="block text-[10px] font-medium uppercase tracking-widest text-gray-400 mb-1.5">Zona</label>
                     <select wire:model="zone_id"
                         class="block w-full rounded-lg border border-gray-200 bg-gray-50 px-3 py-2.5 text-sm text-gray-800 focus:border-gray-500 focus:ring-0 focus:outline-none transition-colors">
-                        <option value="">Pilih zona…</option>
+                        <option value="">Pilih zonaâ€¦</option>
                         @foreach ($zones as $z)
                             <option value="{{ $z['id'] }}">{{ $z['name'] }}</option>
                         @endforeach
@@ -663,7 +672,7 @@ new class extends Component
                             <input
                                 wire:model.live.debounce.200ms="lot_search"
                                 type="text"
-                                placeholder="Cari nomor lot…"
+                                placeholder="Cari nomor lotâ€¦"
                                 class="block w-full rounded-lg border border-gray-200 bg-gray-50 pl-8 pr-3 py-2 text-sm text-gray-800 placeholder-gray-400 focus:border-gray-500 focus:ring-0 focus:outline-none transition-colors"
                             >
                         </div>
@@ -707,7 +716,7 @@ new class extends Component
         @endif
 
 
-        {{-- ── STEP 3 — Fasilitas ── --}}
+        {{-- â”€â”€ STEP 3 — Fasilitas â”€â”€ --}}
         @if ($currentStep === 3)
             <div class="px-5 pt-5 pb-0">
                 <h2 class="text-base font-medium text-gray-900">Fasilitas</h2>
@@ -720,7 +729,6 @@ new class extends Component
                     <label class="block text-[10px] font-medium uppercase tracking-widest text-gray-400 mb-2">Jumlah item</label>
                     <div class="rounded-lg border border-gray-200 overflow-hidden divide-y divide-gray-100">
                         @foreach ([
-                            ['label' => 'Tenda',      'hint' => 'Min 1 — Maks 2',  'prop' => 'tent_count',        'min' => 1, 'max' => 2,  'val' => $tent_count],
                             ['label' => 'Kursi',      'hint' => 'Min 5 — Maks 10', 'prop' => 'chair_count',       'min' => 5, 'max' => 10, 'val' => $chair_count],
                             ['label' => 'Tong Bakar', 'hint' => 'Min 0 — Maks 2',  'prop' => 'burn_barrel_count', 'min' => 0, 'max' => 2,  'val' => $burn_barrel_count],
                         ] as $item)
@@ -734,7 +742,7 @@ new class extends Component
                                         wire:click="decrement('{{ $item['prop'] }}', {{ $item['min'] }})"
                                         @if ($item['val'] <= $item['min']) disabled @endif
                                         class="w-9 h-9 flex items-center justify-center bg-gray-50 text-gray-600 text-base hover:bg-gray-100 disabled:opacity-30 disabled:cursor-not-allowed transition-colors">
-                                        −
+                                        &minus;
                                     </button>
                                     <span class="w-9 text-center text-sm font-medium text-gray-900 select-none">{{ $item['val'] }}</span>
                                     <button type="button"
@@ -747,7 +755,6 @@ new class extends Component
                             </div>
                         @endforeach
                     </div>
-                    @error('tent_count')        <p class="mt-1.5 text-xs text-red-600">{{ $message }}</p> @enderror
                     @error('chair_count')       <p class="mt-1.5 text-xs text-red-600">{{ $message }}</p> @enderror
                     @error('burn_barrel_count') <p class="mt-1.5 text-xs text-red-600">{{ $message }}</p> @enderror
                 </div>
@@ -756,6 +763,16 @@ new class extends Component
                 <div>
                     <label class="block text-[10px] font-medium uppercase tracking-widest text-gray-400 mb-2">Perlengkapan tambahan</label>
                     <div class="space-y-2">
+
+                        <button type="button" wire:click="toggleTent"
+                            class="w-full flex items-center justify-between px-4 py-3 rounded-lg border cursor-pointer transition-all
+                                {{ $tent_count > 0 ? 'border-gray-800 bg-white' : 'border-gray-200 bg-gray-50 hover:border-gray-300' }}">
+                            <span class="text-sm font-medium text-gray-800">Tenda</span>
+                            <div class="relative flex-shrink-0">
+                                <div class="w-10 h-5 rounded-full transition-colors {{ $tent_count > 0 ? 'bg-gray-800' : 'bg-gray-200' }}"></div>
+                                <div class="absolute top-0.5 w-4 h-4 bg-white rounded-full shadow transition-all {{ $tent_count > 0 ? 'left-[22px]' : 'left-0.5' }}"></div>
+                            </div>
+                        </button>
 
                         <button type="button" wire:click="toggle('prayer_table')"
                             class="w-full flex items-center justify-between px-4 py-3 rounded-lg border cursor-pointer transition-all
@@ -778,13 +795,14 @@ new class extends Component
                         </button>
 
                     </div>
+                    @error('tent_count') <p class="mt-1.5 text-xs text-red-600">{{ $message }}</p> @enderror
                 </div>
 
             </div>
         @endif
 
 
-        {{-- ── STEP 4 — Data Diri & Konfirmasi ── --}}
+        {{-- â”€â”€ STEP 4 — Data Diri & Konfirmasi â”€â”€ --}}
         @if ($currentStep === 4)
             <div class="px-5 pt-5 pb-0">
                 <h2 class="text-base font-medium text-gray-900">Data Diri</h2>
@@ -852,7 +870,7 @@ new class extends Component
                             <span class="w-14 flex-shrink-0 text-xs text-gray-400">Jam</span>
                             <span class="text-sm font-medium text-gray-900">
                                 @if (is_array($t))
-                                    {{ substr((string)($t['start_time'] ?? ''), 0, 5) }} – {{ substr((string)($t['end_time'] ?? ''), 0, 5) }}
+                                    {{ substr((string)($t['start_time'] ?? ''), 0, 5) }} â€“ {{ substr((string)($t['end_time'] ?? ''), 0, 5) }}
                                 @else —
                                 @endif
                             </span>
@@ -864,8 +882,8 @@ new class extends Component
                         <div class="flex items-start px-4 py-2.5 gap-3">
                             <span class="w-14 flex-shrink-0 text-xs text-gray-400 mt-0.5">Fasilitas</span>
                             <span class="text-xs text-gray-700 leading-relaxed">
-                                Tenda {{ $tent_count }} · Kursi {{ $chair_count }} · Tong {{ $burn_barrel_count }}<br>
-                                Meja: {{ $prayer_table ? 'Ya' : 'Tidak' }} · Lampu: {{ $lamp ? 'Ya' : 'Tidak' }}
+                                Tenda {{ $tent_count }} &middot; Kursi {{ $chair_count }} &middot; Tong {{ $burn_barrel_count }}<br>
+                                Meja: {{ $prayer_table ? 'Ya' : 'Tidak' }} &middot; Lampu: {{ $lamp ? 'Ya' : 'Tidak' }}
                             </span>
                         </div>
                     </div>
@@ -883,7 +901,7 @@ new class extends Component
         @endif
 
 
-        {{-- ── NAV BAR ── --}}
+        {{-- â”€â”€ NAV BAR â”€â”€ --}}
         <div class="flex items-center justify-between px-5 py-3.5 border-t border-gray-100 bg-gray-50">
             <button
                 type="button"

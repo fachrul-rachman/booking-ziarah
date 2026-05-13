@@ -1,4 +1,4 @@
-<x-layouts.admin>
+﻿<x-layouts.admin>
     <div class="flex items-start justify-between gap-4">
         <div>
             <h1 class="text-lg font-medium text-gray-900">Kelola Lokasi</h1>
@@ -55,7 +55,7 @@
                             <div class="text-[10px] font-medium uppercase tracking-widest text-gray-400">Progress Import</div>
                             <p class="mt-1 text-sm text-gray-700">
                                 <span class="font-medium" x-text="statusLabel"></span>
-                                <span class="text-gray-300 mx-1">·</span>
+                                <span class="text-gray-300 mx-1">&middot;</span>
                                 <span class="text-gray-500" x-text="total > 0 ? `${processed}/${total} baris` : `${processed} baris (menghitung...)`"></span>
                             </p>
                         </div>
@@ -67,7 +67,7 @@
                         <div class="h-1.5 w-full overflow-hidden rounded-full bg-gray-100">
                             <div class="h-full rounded-full bg-gray-700 transition-all" :style="`width: ${percent}%`"></div>
                         </div>
-                        <div class="mt-1 text-xs text-gray-400" x-text="total > 0 ? `${percent}%` : '—'"></div>
+                        <div class="mt-1 text-xs text-gray-400" x-text="total > 0 ? `${percent}%` : '-'"></div>
                     </div>
                 </div>
             </template>
@@ -79,7 +79,7 @@
                     <div class="text-sm font-medium text-gray-900">Sedang mengimpor</div>
                     <div class="mt-1 text-sm text-gray-500">
                         <span x-text="statusLabel"></span>
-                        <span class="text-gray-300 mx-1">·</span>
+                        <span class="text-gray-300 mx-1">&middot;</span>
                         <span x-text="total > 0 ? `${processed}/${total} baris` : `${processed} baris (menghitung...)`"></span>
                     </div>
                     <div class="mt-4">
@@ -210,7 +210,7 @@
                              class="flex items-center justify-between gap-3 px-4 py-3 bg-gray-50 hover:bg-gray-100 cursor-pointer transition-colors select-none">
                             <div>
                                 <div class="text-sm font-medium text-gray-900">{{ $location->name }}</div>
-                                <div class="text-xs text-gray-400 mt-0.5">{{ $zoneCount }} zona · {{ number_format($totalLots) }} lot</div>
+                                <div class="text-xs text-gray-400 mt-0.5">{{ $zoneCount }} zona &middot; {{ number_format($totalLots) }} lot</div>
                             </div>
                             <div class="flex items-center gap-2">
                                 <form id="delete-location-{{ $location->id }}"

@@ -25,16 +25,28 @@ class ImportLocationsJob implements ShouldQueue
             return;
         }
 
-        $import->status = 'running';
-        $import->started_at = now();
-        $import->total_rows = $importService->totalRowsFromPath($import->path);
-        $import->processed_rows = 0;
-        $import->errors_count = 0;
-        $import->created_lots = 0;
-        $import->errors = [];
-        $import->save();
-
         try {
+            // Mark running ASAP so UI doesn't get stuck "queued/menghitung" when anything fails early.
+            LocationImport::query()
+                ->whereKey($import->id)
+                ->update([
+                    'status' => 'running',
+                    'started_at' => now(),
+                    'processed_rows' => 0,
+                    'errors_count' => 0,
+                    'created_lots' => 0,
+                    'errors' => [],
+                    'updated_at' => now(),
+                ]);
+
+            $totalRows = $importService->totalRowsFromPath($import->path);
+            LocationImport::query()
+                ->whereKey($import->id)
+                ->update([
+                    'total_rows' => $totalRows,
+                    'updated_at' => now(),
+                ]);
+
             $importService->importFromPathWithProgress(
                 $import->path,
                 function (int $processed, int $total) use ($import) {

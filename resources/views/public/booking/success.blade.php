@@ -22,7 +22,7 @@
             <div class="pt-2">
                 <div class="font-semibold">Fasilitas</div>
                 <div class="mt-1 text-gray-800">
-                    Tenda: {{ $booking->facility->tent_count }},
+                    Tenda: {{ ($booking->facility->tent_count ?? 0) > 0 ? 'Ya' : 'Tidak' }},
                     Kursi: {{ $booking->facility->chair_count }},
                     Tong Bakar: {{ $booking->facility->burn_barrel_count }},
                     Meja Sembayang: {{ $booking->facility->prayer_table ? 'Ya' : 'Tidak' }},

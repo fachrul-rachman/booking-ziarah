@@ -86,7 +86,7 @@
                             </div>
                         </td>
                         <td class="px-4 py-3 text-xs text-gray-700">
-                            Tenda {{ $b->facility->tent_count }},
+                            Tenda {{ ($b->facility->tent_count ?? 0) > 0 ? 'Ya' : 'Tidak' }},
                             Kursi {{ $b->facility->chair_count }},
                             Tong {{ $b->facility->burn_barrel_count }}
                         </td>

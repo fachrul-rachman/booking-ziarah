@@ -38,7 +38,7 @@
         <div class="rounded-lg bg-white p-4 ring-1 ring-black/5">
             <div class="text-sm font-semibold text-gray-900">Fasilitas</div>
             <div class="mt-3 space-y-2 text-sm text-gray-900">
-                <div><span class="font-semibold">Tenda:</span> {{ $booking->facility->tent_count }}</div>
+                <div><span class="font-semibold">Tenda:</span> {{ ($booking->facility->tent_count ?? 0) > 0 ? 'Ya' : 'Tidak' }}</div>
                 <div><span class="font-semibold">Kursi:</span> {{ $booking->facility->chair_count }}</div>
                 <div><span class="font-semibold">Tong Bakar:</span> {{ $booking->facility->burn_barrel_count }}</div>
                 <div><span class="font-semibold">Meja Sembayang:</span> {{ $booking->facility->prayer_table ? 'Ya' : 'Tidak' }}</div>

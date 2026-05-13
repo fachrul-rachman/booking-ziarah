@@ -63,7 +63,7 @@ class LocationController extends Controller
 
                 session()->put('location_import_id', $import->id);
 
-                dispatch(new ImportLocationsJob($import->id));
+                ImportLocationsJob::dispatch($import->id)->onQueue('location-import');
 
                 return redirect()
                     ->route('admin.locations.index')

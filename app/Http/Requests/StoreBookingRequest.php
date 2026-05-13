@@ -22,7 +22,7 @@ class StoreBookingRequest extends FormRequest
             'booking_date' => ['required', 'date', "after_or_equal:{$minDate}"],
             'time_slot_id' => ['required', 'integer', 'exists:time_slots,id'],
 
-            'tent_count' => ['required', 'integer', 'min:1', 'max:2'],
+            'tent_count' => ['required', 'integer', 'min:0', 'max:1'],
             'chair_count' => ['required', 'integer', 'min:5', 'max:10'],
             'burn_barrel_count' => ['required', 'integer', 'min:0', 'max:2'],
             'prayer_table' => ['required', 'boolean'],
