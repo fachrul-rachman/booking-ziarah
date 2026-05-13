@@ -1,4 +1,5 @@
-﻿<script>
+﻿@once
+<script>
     (function () {
         const _dpFactory = function ({ minDate, selected }) {
             const monthNames = ['Januari','Februari','Maret','April','Mei','Juni','Juli','Agustus','September','Oktober','November','Desember'];
@@ -84,6 +85,7 @@
         }
     })();
 </script>
+@endonce
 
 <?php
 
@@ -287,7 +289,7 @@ new class extends Component
         $this->lot_id = null;
         $this->lot_search = '';
         $this->loadZones();
-        $this->loadAvailableLots();
+        $this->availableLots = [];
         $this->persistState();
     }
 
@@ -317,11 +319,17 @@ new class extends Component
 
     public function selectLocation(int $id): void
     {
-        $this->location_id = $id;
-        $this->loadZones();
+        // Reset dependent state first to avoid inconsistent UI during re-render.
         $this->zone_id = null;
         $this->lot_id = null;
-        $this->loadAvailableLots();
+        $this->booking_date = null;
+        $this->time_slot_id = null;
+        $this->lot_search = '';
+        $this->availableLots = [];
+        $this->zones = [];
+
+        $this->location_id = $id;
+        $this->loadZones();
         $this->persistState();
     }
 
@@ -471,7 +479,7 @@ new class extends Component
 
 <div class="mx-auto max-w-lg pb-10">
 
-    {{-- â•â• STEPPER â•â• --}}
+    {{-- == STEPPER == --}}
     @php $stepLabels = ['Lokasi', 'Zona & Lot', 'Fasilitas', 'Data Diri']; @endphp
     <div class="mt-6 flex items-center px-1">
         @foreach ($stepLabels as $i => $label)
@@ -505,7 +513,7 @@ new class extends Component
         @endforeach
     </div>
 
-    {{-- â•â• MAIN CARD â•â• --}}
+    {{-- == MAIN CARD == --}}
     <div class="mt-4 rounded-xl bg-white border border-gray-100 overflow-hidden">
 
         {{-- Global error --}}
@@ -517,8 +525,9 @@ new class extends Component
         @enderror
 
 
-        {{-- â”€â”€ STEP 1 — Lokasi â”€â”€ --}}
+        {{-- -- STEP 1 — Lokasi -- --}}
         @if ($currentStep === 1)
+            <div wire:key="step-1">
             <div class="px-5 pt-5 pb-0">
                 <h2 class="text-base font-medium text-gray-900">Pilih Lokasi</h2>
                 <p class="text-sm text-gray-400 mt-0.5">Pilih area pemakaman yang ingin dikunjungi</p>
@@ -530,6 +539,8 @@ new class extends Component
                         <button
                             type="button"
                             wire:click="selectLocation({{ $loc['id'] }})"
+                            wire:loading.attr="disabled"
+                            wire:target="selectLocation"
                             class="flex items-center gap-3 rounded-lg border p-3.5 text-left transition-all
                                 {{ $sel ? 'border-gray-800 bg-white' : 'border-gray-200 bg-gray-50 hover:border-gray-400' }}"
                         >
@@ -553,11 +564,13 @@ new class extends Component
                     <p class="mt-2 text-xs text-red-600">{{ $message }}</p>
                 @enderror
             </div>
+            </div>
         @endif
 
 
-        {{-- â”€â”€ STEP 2 — Zona, Tanggal, Jam, Lot â”€â”€ --}}
+        {{-- -- STEP 2 — Zona, Tanggal, Jam, Lot -- --}}
         @if ($currentStep === 2)
+            <div wire:key="step-2">
             <div class="px-5 pt-5 pb-0">
                 <h2 class="text-base font-medium text-gray-900">Zona, Tanggal &amp; Lot</h2>
                 <p class="text-sm text-gray-400 mt-0.5">Tentukan zona, waktu, dan lot yang tersedia</p>
@@ -569,7 +582,7 @@ new class extends Component
                     <label class="block text-[10px] font-medium uppercase tracking-widest text-gray-400 mb-1.5">Zona</label>
                     <select wire:model="zone_id"
                         class="block w-full rounded-lg border border-gray-200 bg-gray-50 px-3 py-2.5 text-sm text-gray-800 focus:border-gray-500 focus:ring-0 focus:outline-none transition-colors">
-                        <option value="">Pilih zonaâ€¦</option>
+                        <option value="">Pilih zona...</option>
                         @foreach ($zones as $z)
                             <option value="{{ $z['id'] }}">{{ $z['name'] }}</option>
                         @endforeach
@@ -672,7 +685,7 @@ new class extends Component
                             <input
                                 wire:model.live.debounce.200ms="lot_search"
                                 type="text"
-                                placeholder="Cari nomor lotâ€¦"
+                                placeholder="Cari nomor lot..."
                                 class="block w-full rounded-lg border border-gray-200 bg-gray-50 pl-8 pr-3 py-2 text-sm text-gray-800 placeholder-gray-400 focus:border-gray-500 focus:ring-0 focus:outline-none transition-colors"
                             >
                         </div>
@@ -713,11 +726,13 @@ new class extends Component
                 </div>
 
             </div>
+            </div>
         @endif
 
 
-        {{-- â”€â”€ STEP 3 — Fasilitas â”€â”€ --}}
+        {{-- -- STEP 3 — Fasilitas -- --}}
         @if ($currentStep === 3)
+            <div wire:key="step-3">
             <div class="px-5 pt-5 pb-0">
                 <h2 class="text-base font-medium text-gray-900">Fasilitas</h2>
                 <p class="text-sm text-gray-400 mt-0.5">Pilih fasilitas yang Anda butuhkan</p>
@@ -799,11 +814,13 @@ new class extends Component
                 </div>
 
             </div>
+            </div>
         @endif
 
 
-        {{-- â”€â”€ STEP 4 — Data Diri & Konfirmasi â”€â”€ --}}
+        {{-- -- STEP 4 — Data Diri & Konfirmasi -- --}}
         @if ($currentStep === 4)
+            <div wire:key="step-4">
             <div class="px-5 pt-5 pb-0">
                 <h2 class="text-base font-medium text-gray-900">Data Diri</h2>
                 <p class="text-sm text-gray-400 mt-0.5">Isi informasi kontak untuk konfirmasi booking</p>
@@ -870,7 +887,7 @@ new class extends Component
                             <span class="w-14 flex-shrink-0 text-xs text-gray-400">Jam</span>
                             <span class="text-sm font-medium text-gray-900">
                                 @if (is_array($t))
-                                    {{ substr((string)($t['start_time'] ?? ''), 0, 5) }} â€“ {{ substr((string)($t['end_time'] ?? ''), 0, 5) }}
+                                    {{ substr((string)($t['start_time'] ?? ''), 0, 5) }} &ndash; {{ substr((string)($t['end_time'] ?? ''), 0, 5) }}
                                 @else —
                                 @endif
                             </span>
@@ -882,7 +899,7 @@ new class extends Component
                         <div class="flex items-start px-4 py-2.5 gap-3">
                             <span class="w-14 flex-shrink-0 text-xs text-gray-400 mt-0.5">Fasilitas</span>
                             <span class="text-xs text-gray-700 leading-relaxed">
-                                Tenda {{ $tent_count }} &middot; Kursi {{ $chair_count }} &middot; Tong {{ $burn_barrel_count }}<br>
+                                Tenda {{ $tent_count > 0 ? 'Ya' : 'Tidak' }} &middot; Kursi {{ $chair_count }} &middot; Tong {{ $burn_barrel_count }}<br>
                                 Meja: {{ $prayer_table ? 'Ya' : 'Tidak' }} &middot; Lampu: {{ $lamp ? 'Ya' : 'Tidak' }}
                             </span>
                         </div>
@@ -898,10 +915,11 @@ new class extends Component
                 </button>
 
             </div>
+            </div>
         @endif
 
 
-        {{-- â”€â”€ NAV BAR â”€â”€ --}}
+        {{-- -- NAV BAR -- --}}
         <div class="flex items-center justify-between px-5 py-3.5 border-t border-gray-100 bg-gray-50">
             <button
                 type="button"
