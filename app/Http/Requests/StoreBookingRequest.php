@@ -16,6 +16,7 @@ class StoreBookingRequest extends FormRequest
         $minDate = now()->addDays(2)->toDateString();
 
         return [
+            'activity_type' => ['required', 'string', 'in:ziarah,naik_batu,start_work,wang_san'],
             'location_id' => ['required', 'integer', 'exists:locations,id'],
             'zone_id' => ['required', 'integer', 'exists:zones,id'],
             'lot_id' => ['required', 'integer', 'exists:lots,id'],

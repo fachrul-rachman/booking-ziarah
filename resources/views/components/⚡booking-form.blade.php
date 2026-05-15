@@ -104,6 +104,7 @@ new class extends Component
 {
     public int $currentStep = 1;
 
+    public string $activity_type = 'ziarah';
     public ?int $location_id = null;
     public ?int $zone_id = null;
     public ?int $lot_id = null;
@@ -182,6 +183,7 @@ new class extends Component
         }
 
         $this->currentStep = (int) ($state['currentStep'] ?? 1) ?: 1;
+        $this->activity_type = (string) ($state['activity_type'] ?? 'ziarah');
         $this->location_id = $state['location_id'] ?? null;
         $this->zone_id = $state['zone_id'] ?? null;
         $this->lot_id = $state['lot_id'] ?? null;
@@ -207,6 +209,7 @@ new class extends Component
     {
         session()->put('booking_form_state', [
             'currentStep' => $this->currentStep,
+            'activity_type' => $this->activity_type,
             'location_id' => $this->location_id,
             'zone_id' => $this->zone_id,
             'lot_id' => $this->lot_id,
@@ -366,6 +369,7 @@ new class extends Component
 
         return match ($step) {
             1 => [
+                'activity_type' => ['required', 'string', 'in:ziarah,naik_batu,start_work,wang_san'],
                 'location_id' => ['required', 'integer', 'exists:locations,id'],
             ],
             2 => [
@@ -438,6 +442,7 @@ new class extends Component
 
                 $booking = Booking::query()->create([
                     'booking_code' => $bookingCode,
+                    'activity_type' => $validated['activity_type'],
                     'name' => $validated['name'],
                     'relationship' => $validated['relationship'],
                     'email' => $validated['email'],
@@ -533,6 +538,20 @@ new class extends Component
                 <p class="text-sm text-gray-400 mt-0.5">Pilih area pemakaman yang ingin dikunjungi</p>
             </div>
             <div class="px-5 py-4">
+                <div class="mb-3">
+                    <label class="block text-[10px] font-medium uppercase tracking-widest text-gray-400 mb-1.5">Jenis kegiatan</label>
+                    <select wire:model="activity_type"
+                        class="block w-full rounded-lg border border-gray-200 bg-gray-50 px-3 py-2.5 text-sm text-gray-800 focus:border-gray-500 focus:ring-0 focus:outline-none transition-colors">
+                        <option value="ziarah">Ziarah</option>
+                        <option value="naik_batu">Naik Batu</option>
+                        <option value="start_work">Start Work</option>
+                        <option value="wang_san">Wang San</option>
+                    </select>
+                    @error('activity_type')
+                        <p class="mt-1.5 text-xs text-red-600">{{ $message }}</p>
+                    @enderror
+                </div>
+
                 <div class="grid grid-cols-1 gap-2 sm:grid-cols-2">
                     @foreach ($locations as $loc)
                         @php $sel = (int)($location_id ?? 0) === (int)$loc['id']; @endphp
@@ -932,7 +951,7 @@ new class extends Component
 
             @php
                 $canNext = match ($currentStep) {
-                    1 => (bool) $location_id,
+                    1 => (bool) $activity_type && (bool) $location_id,
                     2 => (bool) $zone_id && (bool) $booking_date && (bool) $time_slot_id && (bool) $lot_id,
                     3 => true,
                     default => false,
