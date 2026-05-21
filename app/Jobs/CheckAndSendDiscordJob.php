@@ -22,7 +22,8 @@ class CheckAndSendDiscordJob implements ShouldQueue
             return;
         }
 
-        $now = now()->format('H:i:s');
+        // Compare sampai menit saja, karena scheduler sering jalan di detik :01, :02, :03.
+        $now = now()->format('H:i');
 
         foreach (['send_time_1', 'send_time_2'] as $key) {
             $time = (string) ($settings->{$key} ?? '');
@@ -31,16 +32,15 @@ class CheckAndSendDiscordJob implements ShouldQueue
                 continue;
             }
 
-            // Normalize jika suatu saat value dari DB berbentuk "11:52"
-            // atau "11:52:00", tetap bisa dibandingkan sebagai "H:i:s".
-            $normalizedTime = strlen($time) === 5 ? $time.':00' : $time;
+            // DB bisa menyimpan "11:52:00", sedangkan $now adalah "11:52".
+            $scheduledTime = substr($time, 0, 5);
 
-            if ($normalizedTime !== $now) {
+            if ($scheduledTime !== $now) {
                 continue;
             }
 
-            // Lock dibuat per tanggal + per key,
-            // supaya send_time_1 dan send_time_2 tetap bisa jalan di hari yang sama.
+            // Lock per tanggal + per key, supaya send_time_1 dan send_time_2
+            // tetap bisa terkirim di hari yang sama.
             $lockKey = 'discord_notif_sent:'.$key.':'.now()->format('Y-m-d');
 
             if (!Cache::add($lockKey, 1, now()->addDays(2))) {
