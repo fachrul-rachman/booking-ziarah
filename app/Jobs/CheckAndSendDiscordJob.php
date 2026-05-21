@@ -17,22 +17,37 @@ class CheckAndSendDiscordJob implements ShouldQueue
     public function handle(): void
     {
         $settings = DiscordSetting::query()->first();
+
         if (!$settings) {
             return;
         }
 
-        $now = now()->format('H:i');
-        $key = 'send_time_1';
-        $time = (string) ($settings->{$key} ?? '');
-        if ($time === '' || $time !== $now) {
-            return;
-        }
+        $now = now()->format('H:i:s');
 
-        $lockKey = 'discord_notif_sent:'.now()->format('Y-m-d');
-        if (!Cache::add($lockKey, 1, now()->addDays(2))) {
-            return;
-        }
+        foreach (['send_time_1', 'send_time_2'] as $key) {
+            $time = (string) ($settings->{$key} ?? '');
 
-        dispatch(new SendDiscordNotificationJob($key));
+            if ($time === '') {
+                continue;
+            }
+
+            // Normalize jika suatu saat value dari DB berbentuk "11:52"
+            // atau "11:52:00", tetap bisa dibandingkan sebagai "H:i:s".
+            $normalizedTime = strlen($time) === 5 ? $time.':00' : $time;
+
+            if ($normalizedTime !== $now) {
+                continue;
+            }
+
+            // Lock dibuat per tanggal + per key,
+            // supaya send_time_1 dan send_time_2 tetap bisa jalan di hari yang sama.
+            $lockKey = 'discord_notif_sent:'.$key.':'.now()->format('Y-m-d');
+
+            if (!Cache::add($lockKey, 1, now()->addDays(2))) {
+                continue;
+            }
+
+            dispatch(new SendDiscordNotificationJob($key));
+        }
     }
 }
