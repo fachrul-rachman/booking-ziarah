@@ -1,92 +1,3 @@
-﻿@once
-<script>
-    (function () {
-        const _dpFactory = function ({ minDate, selected }) {
-            const monthNames = ['Januari','Februari','Maret','April','Mei','Juni','Juli','Agustus','September','Oktober','November','Desember'];
-
-            const parseYmd = (ymd) => {
-                if (!ymd) return null;
-                const parts = String(ymd).split('-');
-                if (parts.length !== 3) return null;
-                const y = parseInt(parts[0], 10);
-                const m = parseInt(parts[1], 10);
-                const d = parseInt(parts[2], 10);
-                if (!y || !m || !d) return null;
-                return new Date(y, m - 1, d);
-            };
-
-            const toYmd = (date) => {
-                const y = date.getFullYear();
-                const m = String(date.getMonth() + 1).padStart(2, '0');
-                const d = String(date.getDate()).padStart(2, '0');
-                return `${y}-${m}-${d}`;
-            };
-
-            const daysInMonth = (year, month) => new Date(year, month + 1, 0).getDate();
-            const dayOfWeekMon0 = (date) => (date.getDay() + 6) % 7;
-
-            const min = parseYmd(minDate);
-            const selectedDate = parseYmd(selected) ?? null;
-            const base = selectedDate ?? min ?? new Date();
-
-            return {
-                selected,
-                viewYear: base.getFullYear(),
-                viewMonth: base.getMonth(),
-                get monthLabel() {
-                    return `${monthNames[this.viewMonth]} ${this.viewYear}`;
-                },
-                get cells() {
-                    const first = new Date(this.viewYear, this.viewMonth, 1);
-                    const total = daysInMonth(this.viewYear, this.viewMonth);
-                    const leading = dayOfWeekMon0(first);
-                    const selectedParsed = parseYmd(this.selected);
-                    const cells = [];
-                    for (let i = 0; i < leading; i++) {
-                        cells.push({ key: `e-${i}`, day: '', date: null, isDisabled: true, isSelected: false });
-                    }
-                    for (let d = 1; d <= total; d++) {
-                        const dt = new Date(this.viewYear, this.viewMonth, d);
-                        const ymd = toYmd(dt);
-                        const isDisabled = min ? (dt < min) : false;
-                        const isSelected = selectedParsed ? toYmd(selectedParsed) === ymd : false;
-                        cells.push({ key: ymd, day: d, date: ymd, isDisabled, isSelected });
-                    }
-                    return cells;
-                },
-                prevMonth() {
-                    const dt = new Date(this.viewYear, this.viewMonth - 1, 1);
-                    this.viewYear = dt.getFullYear();
-                    this.viewMonth = dt.getMonth();
-                },
-                nextMonth() {
-                    const dt = new Date(this.viewYear, this.viewMonth + 1, 1);
-                    this.viewYear = dt.getFullYear();
-                    this.viewMonth = dt.getMonth();
-                },
-                select(ymd) {
-                    if (!ymd) return;
-                    this.selected = ymd;
-                },
-            };
-        };
-
-        window.datePicker = _dpFactory;
-
-        const register = () => {
-            if (window.Alpine) window.Alpine.data('datePicker', _dpFactory);
-        };
-
-        if (window.Alpine) {
-            register();
-        } else {
-            document.addEventListener('alpine:init', register);
-            document.addEventListener('alpine:initializing', register);
-        }
-    })();
-</script>
-@endonce
-
 <?php
 
 use App\Models\Booking;
@@ -318,6 +229,21 @@ new class extends Component
         $this->lot_search = '';
         $this->loadAvailableLots();
         $this->persistState();
+    }
+
+    public function getFilteredLotsProperty(): array
+    {
+        $query = trim($this->lot_search ?? '');
+        if ($query === '') {
+            return $this->availableLots;
+        }
+
+        $queryLower = mb_strtolower($query);
+
+        return array_values(array_filter($this->availableLots, function ($lot) use ($queryLower) {
+            $num = (string) ($lot['number'] ?? '');
+            return Str::contains(mb_strtolower($num), $queryLower);
+        }));
     }
 
     public function selectLocation(int $id): void
@@ -616,7 +542,8 @@ new class extends Component
                         class="rounded-lg border border-gray-200 overflow-hidden"
                         x-data="datePicker({
                             minDate: '{{ now()->addDays(2)->toDateString() }}',
-                            selected: @entangle('booking_date').live,
+                            selected: @js($booking_date),
+                            wire: (typeof $wire === 'undefined') ? null : $wire,
                         })"
                     >
                         <div class="flex items-center justify-between px-3 py-2.5 bg-gray-50 border-b border-gray-200">
@@ -709,25 +636,18 @@ new class extends Component
                             >
                         </div>
 
-                        @php
-                            $query = trim($lot_search ?? '');
-                            $lotsToShow = $availableLots;
-                            if ($query !== '') {
-                                $lotsToShow = array_values(array_filter($availableLots, function ($lot) use ($query) {
-                                    $num = (string) ($lot['number'] ?? '');
-                                    return Str::contains(mb_strtolower($num), mb_strtolower($query));
-                                }));
-                            }
-                        @endphp
-
-                        @if (count($lotsToShow) === 0)
+                        @if (count($this->filteredLots) === 0)
                             <div class="py-6 text-center text-sm text-gray-400">Lot tidak ditemukan.</div>
                         @else
-                            <div class="grid grid-cols-4 gap-1.5 max-h-44 overflow-y-auto sm:grid-cols-5">
-                                @foreach ($lotsToShow as $lot)
+                            <div
+                                wire:key="lots-grid-{{ (int) $zone_id }}-{{ (string) $booking_date }}-{{ (int) $time_slot_id }}-{{ md5((string) $lot_search) }}"
+                                class="grid grid-cols-4 gap-1.5 max-h-44 overflow-y-auto sm:grid-cols-5"
+                            >
+                                @foreach ($this->filteredLots as $lot)
                                     @php $lotSel = (int)($lot_id ?? 0) === (int)$lot['id']; @endphp
                                     <button
                                         type="button"
+                                        wire:key="lot-btn-{{ (int) $lot['id'] }}"
                                         wire:click="selectLot({{ $lot['id'] }})"
                                         class="rounded-lg border py-2 font-mono text-xs font-medium transition-all
                                             {{ $lotSel
